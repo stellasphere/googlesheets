@@ -2,11 +2,20 @@ const { GoogleSpreadsheet } = require('google-spreadsheet');
 const fs = require('fs');
 
 module.exports = class GoogleSheets {
-  constructor(sheetid,debug) {
+  constructor(sheetid,options) {
     this.docid = sheetid
     this.authenticated = false
     this.doc = new GoogleSpreadsheet(sheetid)
-    this.debug = debug
+    
+    var defaultoptions = {
+      undefinedifblank: true,
+      typerecognition: true,
+      debug: false,
+    }
+    options = options || {}
+    this.options = Object.assign(defaultoptions,options)
+
+    this.debug = this.options.debug
   }
    async authViaServiceAccount(clientemail,privatekey) {
     await this.doc.useServiceAccountAuth({
@@ -99,6 +108,12 @@ module.exports = class GoogleSheets {
       } else {
         // NORMAL DATA
         rowdata[header] = row[header]
+      }
+
+      if(this.options.undefinedifblank) {
+        if(rowdata[header] && (rowdata[header].length < 1)) rowdata[header] = undefined
+      } else {
+        if(!rowdata[header]) rowdata[header] = ""
       }
     }
     
