@@ -1,0 +1,21 @@
+{
+  "name": "@stellasphere/google-sheets",
+  "version": "1.0.0",
+  "description": "A API wrapper for Google's Sheets API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "google",
+    "sheets",
+    "api",
+    "wrapper"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "google-spreadsheet": "^3.3.0"
+  },
+  "devDependencies": {}
+}
