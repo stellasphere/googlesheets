@@ -17,7 +17,10 @@ module.exports = class GoogleSheets {
 
     this.debug = this.options.debug
   }
-   async authViaServiceAccount(clientemail,privatekey) {
+  async authViaServiceAccount(clientemail,privatekey) {
+    if(!clientemail) throw Error("Client email is not defined")
+    if(!privatekey) throw Error("Private key is not defined")
+    
     await this.doc.useServiceAccountAuth({
       client_email: clientemail,
       private_key: privatekey
@@ -25,7 +28,7 @@ module.exports = class GoogleSheets {
     
     await this.authComplete()
   }
-   async authViaServiceAccountFile(path) {
+  async authViaServiceAccountFile(path) {
     var file = await fs.promises.readFile(path)
     var filejson = JSON.parse(file)
     await this.authViaServiceAccount(filejson.client_email,filejson.private_key)
@@ -33,17 +36,11 @@ module.exports = class GoogleSheets {
     await this.authComplete()
   }
   async authViaAPIKey(apikey) {
+    if(!apikey) throw Error("API key is not defined")
+    
     await this.doc.useApiKey(apikey)
     
     await this.authComplete()
-  }
-  async authComplete() {
-    this.authenticated = true
-    await this.doc.loadInfo().catch(async function(err){
-      var error = await err.toJSON()
-      throw Error(`Google API threw an error: ${error.stack}`)
-    })
-    if(this.debug) console.log("authenticated")
   }
   async docInfo() {
     if(!this.authenticated) throw Error("Not Authenticated")
@@ -51,6 +48,10 @@ module.exports = class GoogleSheets {
     return this.doc
   }
   async sheet(sheetname) {
+    if(!sheetname) throw Error("Sheet name is not defined")
+    
+    if(!this.authenticated) throw Error("Not Authenticated")
+
     const sheet = this.doc.sheetsByTitle[sheetname];
     if(!sheet) throw Error(`Sheet with this name does not exist: ${sheetname}`)
     
@@ -60,6 +61,10 @@ module.exports = class GoogleSheets {
     return {sheet,rows,headers}
   }
   async index(sheetname,customprimarykey) {
+    if(!sheetname) throw Error("Sheet name is not defined")
+    
+    if(!this.authenticated) throw Error("Not Authenticated")
+
     var {sheet,rows,headers} = await this.sheet(sheetname)
   
     const primarykey = customprimarykey || headers[0]
@@ -76,6 +81,10 @@ module.exports = class GoogleSheets {
     return data
   }
   async list(sheetname) {
+    if(!sheetname) throw Error("Sheet name is not defined")
+    
+    if(!this.authenticated) throw Error("Not Authenticated")
+
     var {sheet,rows,headers} = await this.sheet(sheetname)
   
     var data = []
@@ -88,7 +97,27 @@ module.exports = class GoogleSheets {
 
     return data
   }
+  async get(sheetname,key,customprimarykey) {
+    if(!sheetname) throw Error("Sheet name is not defined")
+    
+    if(!this.authenticated) throw Error("Not Authenticated")
+
+    var index = await this.index(sheetname,customprimarykey)
+
+    return index[key]
+  }
+  async authComplete() {
+    this.authenticated = true
+    await this.doc.loadInfo().catch(async function(err){
+      var error = await err.toJSON()
+      throw Error(`Google API threw an error: ${error.stack}`)
+    })
+    if(this.debug) console.log("authenticated")
+  }
   rowparser(headers,row) {
+    if(!headers) throw Error("Headers are not defined")
+    if(!row) throw Error("Row is not defined")
+    
     var rowdata = {}
 
     for(var n in headers) {
@@ -118,10 +147,5 @@ module.exports = class GoogleSheets {
     }
     
     return rowdata
-  }
-  async get(sheetname,key,customprimarykey) {
-    var index = await this.index(sheetname,customprimarykey)
-
-    return index[key]
   }
 }
