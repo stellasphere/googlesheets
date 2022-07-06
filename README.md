@@ -20,16 +20,17 @@ var sheet = new GoogleSheets("1x268zkmymCjNm_iUwBM4v4EQCjT0H5IwcVAB-rfZ9x8")
 init()
 
 async function init() {
+  // Remember to remove all but one of the authentication methods.
   // AUTHENTICATION VIA API KEY
   await sheet.authViaAPIKey(process.env.googleapikey) // Get from: https://console.cloud.google.com/apis/credentials/key 
 
 
-  /*// AUTHENTICATION VIA SERVICE ACCOUNT
+  // AUTHENTICATION VIA SERVICE ACCOUNT
   await sheet.authViaServiceAccount(process.env.clientemail, process.env.privatekey) // Get from: https://console.cloud.google.com/iam-admin/serviceaccounts
 
 
   // AUTHENTICATION VIA SERVICE ACCOUNT FILE
-  await sheet.authViaServiceAccountFile("./authentication.json") // Get from: https://console.cloud.google.com/iam-admin/serviceaccounts*/
+  await sheet.authViaServiceAccountFile("./authentication.json") // Get from: https://console.cloud.google.com/iam-admin/serviceaccounts
 
 
   // GET THE ROWS IN A INDEX
