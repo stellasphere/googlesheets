@@ -140,9 +140,11 @@ module.exports = class GoogleSheets {
       }
 
       if(this.options.undefinedifblank) {
-        if(rowdata[header] && (rowdata[header].length < 1)) rowdata[header] = undefined
+        if(rowdata[header] !== undefined) {
+          if(rowdata[header].length < 1) rowdata[header] = undefined
+        }
       } else {
-        if(!rowdata[header]) rowdata[header] = ""
+        if(rowdata[header] == undefined) rowdata[header] = ""
       }
     }
     
