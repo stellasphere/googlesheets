@@ -20,6 +20,8 @@ module.exports = class GoogleSheets {
   async authViaServiceAccount(clientemail,privatekey) {
     if(!clientemail) throw Error("Client email is not defined")
     if(!privatekey) throw Error("Private key is not defined")
+
+    privatekey = privatekey.replace(/\\n/gm,`\n`)
     
     await this.doc.useServiceAccountAuth({
       client_email: clientemail,
