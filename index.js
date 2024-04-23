@@ -1,5 +1,6 @@
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const fs = require('fs');
+const { group } = require('console');
 
 module.exports = class GoogleSheets {
   constructor(sheetid,options) {
@@ -90,7 +91,7 @@ module.exports = class GoogleSheets {
     for(var i in rows) {
       var row = rows[i]
       var rowdata = this.rowparser(headers,row)
-      if(this.debug) console.log("row data",rowdata)
+      if(this.debug) console.log("row data:",rowdata)
       data[row[primarykey]] = rowdata
     }
 
@@ -111,6 +112,31 @@ module.exports = class GoogleSheets {
       var rowdata = this.rowparser(headers,row)
       if(this.debug) console.log("row data",rowdata)
       data.push(rowdata)
+    }
+
+    return data
+  }
+
+
+  async groups(sheetname,groupBy) {
+    if(!sheetname) throw Error("Sheet name is not defined")
+    if(!this.authenticated) throw Error("Not Authenticated")
+
+    var {sheet,rows,headers} = await this.sheet(sheetname)
+
+    const groupByKey = groupBy || headers[0]
+    if(this.debug) console.log("grouping key:",groupByKey)
+
+    var data = {}
+    for(var i in rows) {
+      var row = rows[i]
+      var rowdata = this.rowparser(headers,row)
+      if(this.debug) console.log("row data:",rowdata)
+
+      if(this.debug) console.log("current group value:",data[row[groupByKey]])
+
+      data[row[groupByKey]] ??= []
+      data[row[groupByKey]].push(rowdata)
     }
 
     return data
