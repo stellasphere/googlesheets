@@ -15,4 +15,7 @@ async function init() {
   // console.log("List:",list)  
   var index = await sheet.index("sheet_childattributes")
   console.log("Index:",index)
+
+  var list = await sheet.list("sheet_multicolumn_array")
+  console.log("List:",list)
 }

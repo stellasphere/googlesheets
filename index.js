@@ -205,7 +205,6 @@ module.exports = class GoogleSheets {
 
       if(debug) console.log("parsed header:",headerConfiguration)
       headers.push(headerConfiguration)
-      console.log("tempdehbug1",headers)
     }
 
     if(debug) console.log("parsed headers:",headers)
@@ -245,14 +244,6 @@ module.exports = class GoogleSheets {
       
       rowdata[header.name] = this.typeParser(row[header.raw],header.type,header)
       if(debug) console.log("parsed data:",rowdata[header.name])
-
-      if(this.options.undefinedifblank) {
-        if(rowdata[header] !== undefined) {
-          if(rowdata[header].length < 1) rowdata[header] = undefined
-        }
-      } else {
-        if(rowdata[header] == undefined) rowdata[header] = ""
-      }
     }
 
     return rowdata
@@ -319,8 +310,10 @@ module.exports = class GoogleSheets {
   }
   typeParser(content,type,options,debug=this.debug) {
     if(debug) console.log("Type Parser")
-    if(!content) throw Error("Content is not defined")
     if(!type) throw Error("Type is not defined")
+
+    if(this.options.undefinedifblank && !content) return undefined
+    else if(!content) return ""
 
     // Verify  type
     if(debug) console.log("type:",type)
