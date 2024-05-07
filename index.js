@@ -211,22 +211,35 @@ module.exports = class GoogleSheets {
     return headers
   }
   attributesParser(attributesText,withBrackets=false,debug=this.debug) {
+    debug = true
     if(debug) console.log("Attributes Parser")
+    if(debug) console.log("attribute raw text:",attributesText)
+
+    if(withBrackets) attributesText = attributesText.slice(1,-1) 
     
     var attributesData = {}
-    var attributes = attributesText.split(" ")
-    attributes.forEach(attributeText=>{
-      if(debug) console.log("raw attribute:",attributeText)
-      if(attributeText.trim().length == 0) return
-      var attributeSplit = attributeText.split("=")
-      var key = attributeSplit[0].trim()
 
-      if(attributeSplit.length > 1) attributeSplit[1] = attributeSplit.slice(1).join("=")
-      var value = attributeSplit[1]?.trim()
-      if(debug) console.log("processed attribute:",key,value,attributeSplit)
+    var pattern = /(\w+)=(.+?)(?=\s|$)/g;
+    var matches = attributesText.matchAll(pattern);
+    
+    var nested = undefined
+    for (const match of matches) {
+      const key = match[1].trim();
+      const value = match[2].trim();
+      if(debug) console.log("attribute: key:",key,"value:",value)
+
+      if(value.startsWith("[")) {
+          nested = key
+      } else if(nested) {
+            attributesData[nested] += ` ${key}=${value}`
+          if(value.endsWith("]")) {
+              nested = undefined
+          }
+          continue
+      }
 
       attributesData[key] = value
-    })
+    }
 
     if(debug) console.log("parsed attributes:",attributesData)
     return attributesData
@@ -278,8 +291,9 @@ module.exports = class GoogleSheets {
 
         var elementAttributes = Object.assign({},this.TYPE_OPTIONS.array)
         if(typeoptions.elementAttributes) {
-          var customElementAttrs = typeoptions.elementAttributes.slice(1, -1)
-          elementAttributes = this.attributesParser(customElementAttrs)
+          var customElementAttrs = typeoptions.elementAttributes
+          if(debug) console.log("custom element attributes:",customElementAttrs)
+          elementAttributes = this.attributesParser(customElementAttrs,true)
         }
         
         if(debug) console.log("element attributes:",elementAttributes)
@@ -289,7 +303,7 @@ module.exports = class GoogleSheets {
           &&
           elementAttributes.separator == typeoptions.separator
         ) {
-          throw Error("")
+          throw Error("Created a infinite array sepration loop")
         }
         
         var parsedElement = this.typeParser(element,typeoptions.elementType,elementAttributes)
